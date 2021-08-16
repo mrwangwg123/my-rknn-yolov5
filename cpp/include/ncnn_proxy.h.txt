@@ -1,0 +1,48 @@
+#ifndef WF_NCNN_PROXY_H_
+#define WF_NCNN_PROXY_H_
+
+#define PLATFORM_HISI
+#ifndef PLATFORM_HISI
+
+#include "detector_bridge.h"
+#include <ncnn/layer.h>
+#include <ncnn/net.h>
+
+class NCNNProxy : public NN {
+
+public: 
+    NCNNProxy();
+
+    ~NCNNProxy();
+
+    /**
+     * 自定义网络层
+     */
+    int registerCustomLayer(std::string layer_name, ncnn::Layer layer);
+
+    /**
+     * 加载模型
+     */ 
+    virtual int loadModel(const char *model_path);
+
+    /**
+     * 提取指定网络层输出
+     */
+    // virtual int extract(int blob_name, cv::Mat &feat);
+    
+    /**
+    * 进行推理  
+    */
+    virtual int inference(cv::Mat &input);
+
+    /**
+     * 释放资源 
+     */
+    virtual int release();
+private:
+    bool is_initialized;
+    ncnn::Net ncnnImpl;
+};
+
+#endif
+#endif //WF_NCNN_PROXY_H_

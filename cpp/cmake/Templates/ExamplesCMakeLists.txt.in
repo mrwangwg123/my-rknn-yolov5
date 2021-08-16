@@ -1,0 +1,37 @@
+# This's a CMake template for building examples codes
+#
+# We can now run the following commands to build the application from within the examples/ folder:
+#     - mkdir build
+#     - cd build
+#     - cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_PREFIX_PATH=`pwd`/../../share/cmake ..
+#     - make
+#
+
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+
+project(@MYLIB_MODULE_NAME@Examples)
+
+# Find the third-party modules
+# Notify: using "cmake -DCMAKE_PREFIX_PATH=/path/to/third-party/cmake .." to specify the path of CMake script
+find_package(@MYLIB_MODULE_NAME@ REQUIRED)
+
+# Traverse through all source code files in the current directory
+AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR} srcs)
+
+if(srcs)
+# Build each source file independently
+    foreach(source ${srcs})
+        get_filename_component(name ${source} NAME_WE)
+        add_executable(${name} ${source})
+        if("@EXAMPLES_DEFINITIONS@")
+            target_compile_definitions(${name} PUBLIC "@EXAMPLES_DEFINITIONS")
+        endif()
+        if("@EXAMPLES_CXX_FLAGS@")
+            target_compile_options(${name} PUBLIC "@EXAMPLES_CXX_FLAGS@")
+        endif()
+        if(@MYLIB_MODULE_NAME@_FOUND)
+            target_link_libraries(${name} "${@MYLIB_NAME_UPPER@_LIBRARIES}")
+        endif()
+        set_property(TARGET ${name} PROPERTY CXX_STANDARD 11)
+    endforeach(source)
+endif()

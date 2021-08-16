@@ -1,0 +1,66 @@
+# Find @MYLIB_MODULE_NAME@
+# -------
+#
+# Finds the @MYLIB_MODULE_NAME@ library
+#
+# This will define the following variables:
+#
+#   @MYLIB_MODULE_NAME_UPPER@_FOUND             -- True if the system has the @MYLIB_MODULE_NAME@ library
+#   @MYLIB_MODULE_NAME_UPPER@_INCLUDE_DIRS      -- The include directories for @MYLIB_MODULE_NAME@
+#   @MYLIB_MODULE_NAME_UPPER@_LIBRARIES         -- Libraries to link against
+#   @MYLIB_MODULE_NAME_UPPER@_LIBRARIES_ARCHIVE -- Libraries type is archive
+#   @MYLIB_MODULE_NAME_UPPER@_CXX_FLAGS         -- Additional (required) compiler flags
+#
+# and the following imported targets:
+#
+#   @MYLIB_NAME@
+
+include(FindPackageHandleStandardArgs)
+
+if (DEFINED ENV{@MYLIB_MODULE_NAME_UPPER@_INSTALL_PREFIX})
+  set(@MYLIB_MODULE_NAME_UPPER@_INSTALL_PREFIX $ENV{@MYLIB_MODULE_NAME_UPPER@_INSTALL_PREFIX})
+else()
+  # Assume we are in <install-prefix>/share/cmake/@MYLIB_MODULE_NAME@Config.cmake
+  get_filename_component(CMAKE_CURRENT_LIST_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+  get_filename_component(@MYLIB_MODULE_NAME_UPPER@_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/../../" ABSOLUTE)
+endif()
+
+# Include directories.
+if (EXISTS "${@MYLIB_MODULE_NAME_UPPER@_INSTALL_PREFIX}/lib/include")
+  set(@MYLIB_MODULE_NAME_UPPER@_INCLUDE_DIRS
+    ${@MYLIB_MODULE_NAME_UPPER@_INSTALL_PREFIX}/lib/include)
+else()
+  set(@MYLIB_MODULE_NAME_UPPER@_INCLUDE_DIRS
+    ${@MYLIB_MODULE_NAME_UPPER@_INSTALL_PREFIX}/include)
+endif()
+
+# Library dependencies.
+find_library(@MYLIB_MODULE_NAME_UPPER@_LIBRARY @MYLIB_NAME@ NO_DEFAULT_PATH PATHS "${@MYLIB_MODULE_NAME_UPPER@_INSTALL_PREFIX}/lib")
+
+add_library(@MYLIB_NAME@ UNKNOWN IMPORTED)
+set(@MYLIB_MODULE_NAME_UPPER@_LIBRARIES @MYLIB_NAME@)
+
+# Set required cxx flags
+if ("@MYLIB_INTERFACE_CXX_FLAGS@")
+  set(@MYLIB_MODULE_NAME_UPPER@_CXX_FLAGS "@MYLIB_INTERFACE_CXX_FLAGS@")
+endif()
+
+# Set required link flags
+if ("@MYLIB_INTERFACE_LINK_FLAGS@")
+  set(@MYLIB_MODULE_NAME_UPPER@_CXX_FLAGS "@MYLIB_INTERFACE_LINK_FLAGS@")
+endif()
+
+set_target_properties(@MYLIB_NAME@ PROPERTIES
+    IMPORTED_LOCATION "${@MYLIB_MODULE_NAME_UPPER@_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES "${@MYLIB_MODULE_NAME_UPPER@_INCLUDE_DIRS}"
+    CXX_STANDARD 11
+)
+if (@MYLIB_MODULE_NAME_UPPER@_CXX_FLAGS)
+  set_property(TARGET @MYLIB_NAME@ PROPERTY INTERFACE_COMPILE_OPTIONS "${@MYLIB_MODULE_NAME_UPPER@_CXX_FLAGS}")
+endif()
+
+if (@MYLIB_MODULE_NAME_UPPER@_LINK_FLAGS)
+  set_property(TARGET @MYLIB_NAME@ PROPERTY INTERFACE_LINK_OPTIONS "${@MYLIB_MODULE_NAME_UPPER@_LINK_FLAGS}")
+endif()
+
+find_package_handle_standard_args(@MYLIB_NAME@ DEFAULT_MSG @MYLIB_MODULE_NAME_UPPER@_LIBRARY @MYLIB_MODULE_NAME_UPPER@_INCLUDE_DIRS)
